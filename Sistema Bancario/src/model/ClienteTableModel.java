@@ -59,6 +59,16 @@ public class ClienteTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void filtrarClientePorLinha(int linha) {
+        if (linha >= 0 && linha < clientes.size()) {
+            Cliente c = clientes.get(linha);
+            List<Cliente> clienteFiltrado = new ArrayList<>();
+            clienteFiltrado.add(c);
+            this.clientes = clienteFiltrado;
+            System.out.println("Filtrou cliente: " + c.getCpf());
+        }
+    }
+
     @Override
     public int getRowCount() {
         return clientes.size();

@@ -83,11 +83,15 @@ public class TelaManterClientes extends JFrame {
 
             sorter.setComparator(0, null);
         });
+        
+        JButton btnEditar = new JButton("Editar");
+        btnEditar.addActionListener(e -> abrirTelaCadastroAtualizacao(tabelaClientes.getSelectedRow()));
 
         ActionListener acaoEditar = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int linha = Integer.parseInt(e.getActionCommand());
-                abrirTelaCadastroAtualizacao(linha);
+                int linha = tabelaClientes.getSelectedRow();
+                System.out.println(linha);
+                tableModel.filtrarClientePorLinha(linha);
             }
         };
         new ButtonColumn(tabelaClientes, acaoEditar, 5);
