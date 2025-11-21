@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ClienteTableModel extends AbstractTableModel {
     private List<Cliente> clientes;
     private List<Cliente> clientesOriginais;
-    final private String[] colunas = {"Nome", "Sobrenome", "RG", "CPF", "Endereço", "Editar", "Vincular", "Conta"};
+    final private String[] colunas = {"Nome", "Sobrenome", "RG", "CPF", "Endereço", "Saldo", "Tipo Conta", "Editar", "Vincular", "Conta"};
 
     public ClienteTableModel() {
         this.clientes = new ArrayList<>();
@@ -26,6 +26,8 @@ public class ClienteTableModel extends AbstractTableModel {
         }
         return null;
     }
+
+    // FILTROS
 
     public void filtrarPorNome(String nomeBusca) {
         if (nomeBusca == null || nomeBusca.trim().isEmpty()) {
@@ -48,9 +50,41 @@ public class ClienteTableModel extends AbstractTableModel {
             this.clientes = new ArrayList<>(this.clientesOriginais);
         } else {
             List<Cliente> clientesFiltrados = new ArrayList<>();
-            String buscaSemEspacos = cpfBusca.replaceAll("\\s+", "");
+            String busca = cpfBusca.replaceAll("\\s+", "");
             for (Cliente c : this.clientesOriginais) {
-                if (c.getCpf().replaceAll("\\s+", "").contains(buscaSemEspacos)) {
+                if (c.getCpf().replaceAll("\\s+", "").contains(busca)) {
+                    clientesFiltrados.add(c);
+                }
+            }
+            this.clientes = clientesFiltrados;
+        }
+        fireTableDataChanged();
+    }
+
+    public void filtrarPorSobrenome(String sobrenomeBusca) {
+        if (sobrenomeBusca == null || sobrenomeBusca.trim().isEmpty()) {
+            this.clientes = new ArrayList<>(this.clientesOriginais);
+        } else {
+            List<Cliente> clientesFiltrados = new ArrayList<>();
+            String buscaEmMinusculo = sobrenomeBusca.toLowerCase();
+            for (Cliente c : this.clientesOriginais) {
+                if (c.getSobrenome().toLowerCase().contains(buscaEmMinusculo)) {
+                    clientesFiltrados.add(c);
+                }
+            }
+            this.clientes = clientesFiltrados;
+        }
+        fireTableDataChanged();
+    }
+
+    public void filtrarPorRg(String rgBusca) {
+        if (rgBusca == null || rgBusca.trim().isEmpty()) {
+            this.clientes = new ArrayList<>(this.clientesOriginais);
+        } else {
+            List<Cliente> clientesFiltrados = new ArrayList<>();
+            String busca = rgBusca.replaceAll("\\s+", "");
+            for (Cliente c : this.clientesOriginais) {
+                if (c.getRg().replaceAll("\\s+", "").contains(busca)) {
                     clientesFiltrados.add(c);
                 }
             }
@@ -67,6 +101,13 @@ public class ClienteTableModel extends AbstractTableModel {
             this.clientes = clienteFiltrado;
             System.out.println("Filtrou cliente: " + c.getCpf());
         }
+    }
+
+    // MÉTODOS 
+
+    public void recarregar() {
+        this.clientes = new ArrayList<>(this.clientesOriginais);
+        fireTableDataChanged();
     }
 
     @Override
@@ -93,27 +134,37 @@ public class ClienteTableModel extends AbstractTableModel {
             case 2: return c.getRg();
             case 3: return c.getCpf();
             case 4: return c.getEndereco();
-            case 5: return "Editar"; // Texto do botão
-            case 6: return "Vincular"; // Texto do botão
-            case 7: return "Operar"; // Texto do botão
+            case 5: 
+                if (c.getConta() != null) {
+                    return String.format("R$ %.2f", c.getConta().getSaldo());
+                }
+                return "Sem conta";
+            case 6: 
+                if (c.getConta() != null) {
+                    if (c.getConta() instanceof ContaCorrente) {
+                        return "Corrente";
+                    } else if (c.getConta() instanceof ContaInvestimento) {
+                        return "Investimento";
+                    }
+                }
+                return "Sem conta";
+            case 7: return "Editar";
+            case 8: return "Vincular";  
+            case 9: return "Operar";
             default: return null;
         }
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        // Colunas 5 (Editar), 6 (Vincular) e 7 (Conta) são botões
-        return columnIndex == 5 || columnIndex == 6 || columnIndex == 7;
+        return columnIndex >= 7; 
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        // Colunas 5 (Editar), 6 (Vincular) e 7 (Operar)
-        if (columnIndex == 5 || columnIndex == 6 || columnIndex == 7) {
+        if (columnIndex >= 7) {
             return Object.class;
         }
-        // Para todas as outras colunas, retorna String.class (ou o tipo de dado real)
         return String.class;
     }
 }
-

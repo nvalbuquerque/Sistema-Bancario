@@ -2,8 +2,6 @@ package view;
 
 import model.Conta;
 import model.ContaCorrente;
-import model.ContaInvestimento;
-import model.RepositorioDados;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

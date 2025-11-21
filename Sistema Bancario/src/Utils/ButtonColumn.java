@@ -18,6 +18,7 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
     private JButton renderButton;
     private JButton editorButton;
     private String text;
+    private int currentRow;
 
     public ButtonColumn(JTable table, ActionListener action, int column) {
         this.table = table;
@@ -45,10 +46,6 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
         text = (value == null) ? "" : value.toString();
         renderButton.setText(text);
 
-        // Garante que o editor esteja ativo na renderização (Correção de clique)
-        table.getColumnModel().getColumn(column).setCellEditor(this);
-        table.getColumnModel().getColumn(column).setCellRenderer(this);
-
         return renderButton;
     }
 
@@ -56,10 +53,10 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         text = (value == null) ? "" : value.toString();
         editorButton.setText(text);
+        currentRow = row; // Guarda a linha atual
         return editorButton;
     }
 
-    // MÉTODO OBRIGATÓRIO (CORREÇÃO DE COMPILAÇÃO)
     @Override
     public Object getCellEditorValue() {
         return text;
@@ -68,7 +65,8 @@ public class ButtonColumn extends AbstractCellEditor implements TableCellRendere
     @Override
     public void actionPerformed(ActionEvent e) {
         fireEditingStopped();
-        ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED, "" + table.getEditingRow());
+        // Usa a linha guardada em vez de table.getEditingRow()
+        ActionEvent event = new ActionEvent(table, ActionEvent.ACTION_PERFORMED, "" + currentRow);
         action.actionPerformed(event);
     }
 }
