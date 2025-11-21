@@ -35,13 +35,6 @@ public class Cliente implements Comparable<Cliente> {
     public Conta getConta() { return conta; }
     public void setConta(Conta conta) { this.conta = conta; }
 
-    public double getSalario() {
-        if (this.conta == null) {
-            return 0.0;
-        }
-        return this.conta.getSaldo();
-    }
-
     @Override
     public int compareTo(Cliente outro) {
         // 1. Comparação por Nome (Ordem Alfabética)
