@@ -27,18 +27,16 @@ O objetivo é gerenciar clientes e suas contas bancárias, permitindo operaçõe
 
 O projeto está organizado em pacotes para manter a modularidade:
 
-- **model**: classes de domínio e regras de negócio (`Cliente`, `Conta`, `ContaCorrente`, `ContaInvestimento`, `ContaI`, `Banco`)
-- **dao** (opcional): persistência de dados (`ClienteDAO`, `ContaDAO`)
-- **view**: telas Swing (`MainView`, `ClienteView`, `ContaView`, `OperacoesView`)
-- **controller**: ligação entre view e model (`ClienteController`, `ContaController`, `OperacoesController`)
-- **util**: utilitários e classes auxiliares (`TableModelCliente`, `GeradorNumeroConta`)
+- **model**: classes de domínio e regras de negócio (`Cliente`, `Conta`, `ContaCorrente`, `ContaInvestimento`, `ContaInterface`, `RepositorioDados`, `ClienteSalarioComparator`, `ClienteTableModel`)
+- **view**: telas Swing (`Main`, `TelaCadastroCliente`, `TelaManterClientes`, `TelaVincularConta`, `TelaVincularConta`)
+- **util**: utilitários e classes auxiliares (`ButtonColumn`)
 
 ## 🔄 Fluxo do Sistema
 
-1. **Menu Principal (MainView)** → acesso às funcionalidades de clientes, contas e operações.
-2. **Gerenciar Clientes (ClienteView)** → CRUD, busca e ordenação de clientes.
-3. **Vincular Conta (ContaView)** → seleção de cliente, tipo de conta e preenchimento de dados.
-4. **Operar Conta (OperacoesView)** → saque, depósito, saldo e remuneração.
+1. **Menu Principal (Main)** → acesso às funcionalidades de clientes, contas e operações.
+2. **Gerenciar Clientes (TelaCadastroCliente, TelaManterClientes)** → CRUD, busca e ordenação de clientes.
+3. **Vincular Conta (TelaVincularConta)** → seleção de cliente, tipo de conta e preenchimento de dados.
+4. **Operar Conta (TelaOperacoesConta)** → saque, depósito, saldo e remuneração.
 
 ## 📜 Regras de Negócio
 
