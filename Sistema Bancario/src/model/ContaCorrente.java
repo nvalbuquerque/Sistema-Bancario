@@ -1,41 +1,54 @@
 package model;
 
-import javax.swing.*;
-
 public class ContaCorrente extends Conta {
 
     private double limite;
 
     public ContaCorrente(Cliente dono, int numero, double depositoInicial, double limite) {
         super(dono, numero, depositoInicial);
+
+        if (limite < 0) {
+            throw new IllegalArgumentException("O limite não pode ser negativo.");
+        }
+
         this.limite = limite;
     }
 
     @Override
     public boolean saca(double valor) {
         if (valor <= 0) {
-
-            return super.saca(valor);
+            throw new IllegalArgumentException("O valor do saque deve ser positivo.");
         }
 
-        if (saldo - valor >= -limite) {
-            saldo -= valor;
-            return true;
+        if (saldo - valor < -limite) {
+            throw new IllegalStateException(
+                "Saque excede o limite disponível. Limite permitido: R$ " + limite
+            );
         }
 
-        // Mostrar mensagem na tela informando o usuário [cite: 58]
-        JOptionPane.showMessageDialog(null,
-                "Saque excede o limite disponível de R$ " + limite + ".",
-                "Erro no Saque", JOptionPane.ERROR_MESSAGE);
-
-        return false;
+        saldo -= valor;
+        return true;
     }
 
     @Override
     public void remunera() {
-        saldo += saldo * 0.01; // Aplicar remuneração de 1% ao saldo da conta [cite: 59]
+        if (saldo <= 0) {
+            throw new IllegalStateException("Saldo negativo.");
+        }
+        // Conta Corrente recebe 1% se estiver com saldo positivo
+        saldo += saldo * 0.01;
     }
 
-    public double getLimite() { return limite; }
-    public void setLimite(double limite) { this.limite = limite; }
+    public double getLimite() {
+        return limite;
+    }
+
+    public void setLimite(double limite) {
+
+        if (limite < 0) {
+            throw new IllegalArgumentException("O limite não pode ser negativo.");
+        }
+
+        this.limite = limite;
+    }
 }
