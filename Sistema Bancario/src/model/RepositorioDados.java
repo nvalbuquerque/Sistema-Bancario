@@ -25,7 +25,7 @@ public class RepositorioDados {
         return instance;
     }
 
-    // --- Getters das Listas ---
+    // Getters das Listas
 
     public ArrayList<Cliente> getListaClientes() {
         return listaClientes;
@@ -39,7 +39,7 @@ public class RepositorioDados {
         return listaContasCorrente;
     }
 
-    // --- Métodos de Manipulação (CRUD) ---
+    // Métodos de Manipulação (CRUD)
 
     public void adicionarCliente(Cliente cliente) {
         this.listaClientes.add(cliente);
@@ -68,7 +68,7 @@ public class RepositorioDados {
         listaClientes.remove(cliente);
     }
 
-    // --- Métodos de Busca (Query) ---
+    // Métodos de Busca
 
     public Cliente buscarClientePorCpf(String cpf) {
         for (Cliente c : listaClientes) {
@@ -79,6 +79,14 @@ public class RepositorioDados {
         return null;
     }
 
+    public Cliente buscarClientePorRg(String rg) {
+    for (Cliente c : listaClientes) {
+        if (c.getRg().equals(rg)) return c;
+    }
+    return null;
+    }
+
+
     public Conta buscarContaPorCpf(String cpf) {
         Cliente cliente = buscarClientePorCpf(cpf);
         if (cliente != null) {
@@ -87,7 +95,7 @@ public class RepositorioDados {
         return null;
     }
 
-    // --- Métodos Utilitários ---
+    // Métodos Utilitários
 
     /**
      * Gera e retorna um número de conta único e sequencial.

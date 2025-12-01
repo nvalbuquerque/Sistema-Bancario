@@ -17,7 +17,7 @@ public class TelaCadastroCliente extends JDialog {
     private Cliente clienteParaAtualizar;
 
     public TelaCadastroCliente(Frame owner, Cliente cliente) {
-        super(owner, true); // Modal
+        super(owner, true); 
         
         this.clienteParaAtualizar = cliente;
 
@@ -29,11 +29,11 @@ public class TelaCadastroCliente extends JDialog {
 
         setBounds(150, 150, 450, 300);
         getContentPane().setLayout(new BorderLayout());
-        
+
         JPanel contentPanel = new JPanel();
         contentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
-        contentPanel.setLayout(new GridLayout(5, 2, 5, 5)); // 5 linhas, 2 colunas
+        contentPanel.setLayout(new GridLayout(5, 2, 5, 5));
 
         contentPanel.add(new JLabel("Nome:"));
         txtNome = new JTextField();
@@ -66,54 +66,98 @@ public class TelaCadastroCliente extends JDialog {
         JButton okButton = new JButton("Salvar");
         okButton.addActionListener(e -> salvarCliente());
         buttonPane.add(okButton);
-        
+
         JButton cancelButton = new JButton("Cancelar");
-        cancelButton.addActionListener(e -> dispose()); // Fecha a janela
+        cancelButton.addActionListener(e -> dispose());
         buttonPane.add(cancelButton);
     }
-    
+
     private void preencherCampos() {
         txtNome.setText(clienteParaAtualizar.getNome());
         txtSobrenome.setText(clienteParaAtualizar.getSobrenome());
         txtRg.setText(clienteParaAtualizar.getRg());
         txtCpf.setText(clienteParaAtualizar.getCpf());
-        txtCpf.setEnabled(false); // CPF não deve ser editado
+        txtCpf.setEnabled(false); 
         txtEndereco.setText(clienteParaAtualizar.getEndereco());
     }
 
     private void salvarCliente() {
-        if (txtNome.getText().trim().isEmpty() || txtCpf.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                    "Campos 'Nome' e 'CPF' são obrigatórios.", 
-                    "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
-        String nome = txtNome.getText();
-        String sobrenome = txtSobrenome.getText();
-        String rg = txtRg.getText();
-        String cpf = txtCpf.getText();
-        String endereco = txtEndereco.getText();
-        
+    // Validação simples obrigatória
+    if (txtNome.getText().trim().isEmpty() ||
+        txtCpf.getText().trim().isEmpty() ||
+        txtRg.getText().trim().isEmpty()) 
+    {
+        JOptionPane.showMessageDialog(this,
+                "Nome, CPF e RG são obrigatórios.",
+                "Erro de Validação",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    String nome = txtNome.getText().trim();
+    String sobrenome = txtSobrenome.getText().trim();
+    String rgRaw = txtRg.getText().trim();
+    String cpfRaw = txtCpf.getText().trim();
+    String endereco = txtEndereco.getText().trim();
+
+    // normaliza: tira pontos, traços, espaços
+    String cpfDigits = cpfRaw.replaceAll("\\D", "");
+    String rgDigits = rgRaw.replaceAll("\\D", "");
+
+    RepositorioDados repo = RepositorioDados.getInstance();
+
+    try {
+        // 1) valida formato e algoritmo usando os validadores do modelo
+        Cliente.validarRg(rgDigits);
+        Cliente.validarCpf(cpfDigits);
+
+        // 2) verifica unicidade no repositório com CPFs/RGs normalizados
         if (clienteParaAtualizar == null) {
-            if (RepositorioDados.getInstance().buscarClientePorCpf(cpf) != null) {
-                 JOptionPane.showMessageDialog(this, 
-                        "Já existe um cliente com este CPF.", 
+            if (repo.buscarClientePorCpf(cpfDigits) != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Já existe um cliente com este CPF.",
                         "Erro", JOptionPane.ERROR_MESSAGE);
-                 return;
+                return;
             }
-            
-            Cliente novoCliente = new Cliente(nome, sobrenome, rg, cpf, endereco);
-            RepositorioDados.getInstance().adicionarCliente(novoCliente);
+            if (repo.buscarClientePorRg(rgDigits) != null) {
+                JOptionPane.showMessageDialog(this,
+                        "Já existe um cliente com este RG.",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // 3) tudo ok → cria cliente (setters normalizam)
+            Cliente novo = new Cliente(nome, sobrenome, rgDigits, cpfDigits, endereco);
+            repo.adicionarCliente(novo);
             JOptionPane.showMessageDialog(this, "Cliente incluído com sucesso!");
 
         } else {
+            // atualização: verificar duplicidade de RG com outro cliente
+            Cliente outroRg = repo.buscarClientePorRg(rgDigits);
+            if (outroRg != null && outroRg != clienteParaAtualizar) {
+                JOptionPane.showMessageDialog(this,
+                        "Outro cliente já utiliza este RG.",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Atualiza somente depois de validações
             clienteParaAtualizar.setNome(nome);
             clienteParaAtualizar.setSobrenome(sobrenome);
-            clienteParaAtualizar.setRg(rg);
+            clienteParaAtualizar.setRg(rgDigits);    // setter valida e normaliza
             clienteParaAtualizar.setEndereco(endereco);
+
             JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso!");
         }
+
         dispose();
+
+    } catch (IllegalArgumentException ex) {
+        JOptionPane.showMessageDialog(this,
+                ex.getMessage(),
+                "Erro de Formato",
+                JOptionPane.ERROR_MESSAGE);
+    }
     }
 }

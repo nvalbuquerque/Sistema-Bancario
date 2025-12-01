@@ -1,6 +1,6 @@
 package view;
 
-import model.*; // Importa todos os seus modelos
+import model.*; 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -11,18 +11,14 @@ public class TelaVincularConta extends JDialog {
 
     private Cliente cliente;
 
-    // Componentes de Seleção
     private JComboBox<String> cmbTipoConta;
 
-    // Painéis dinâmicos
     private JPanel painelCartoes;
     private CardLayout cardLayout;
 
-    // Campos Conta Corrente
     private JTextField txtDepIniCC;
     private JTextField txtLimiteCC;
 
-    // Campos Conta Investimento
     private JTextField txtMontanteMinCI;
     private JTextField txtDepMinCI;
     private JTextField txtDepIniCI;
@@ -31,9 +27,12 @@ public class TelaVincularConta extends JDialog {
         super(owner, true);
         this.cliente = cliente;
 
-        // Validação prévia: Um cliente pode estar vinculado a apenas um tipo de conta [cite: 14]
         if (cliente.getConta() != null) {
-            JOptionPane.showMessageDialog(this, "O cliente " + cliente.getNome() + " já possui uma conta vinculada.", "Conta Existente", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "O cliente " + cliente.getNome() + " já possui uma conta vinculada.",
+                    "Conta Existente",
+                    JOptionPane.WARNING_MESSAGE);
+
             dispose();
             return;
         }
@@ -43,14 +42,13 @@ public class TelaVincularConta extends JDialog {
         setLayout(new BorderLayout(10, 10));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Painel Superior: Seleção de Tipo de Conta
         JPanel painelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT));
         painelSuperior.add(new JLabel("Tipo de Conta:"));
-        cmbTipoConta = new JComboBox<>(new String[]{"Selecione o Tipo...", "Conta Corrente", "Conta Investimento"});
+        cmbTipoConta = new JComboBox<>(new String[]{
+                "Selecione o Tipo...", "Conta Corrente", "Conta Investimento"});
         painelSuperior.add(cmbTipoConta);
         add(painelSuperior, BorderLayout.NORTH);
 
-        // Painel Central: Cartões com Campos Específicos
         cardLayout = new CardLayout();
         painelCartoes = new JPanel(cardLayout);
         add(painelCartoes, BorderLayout.CENTER);
@@ -61,8 +59,6 @@ public class TelaVincularConta extends JDialog {
         painelCartoes.add(new JPanel(), "Vazio");
         cardLayout.show(painelCartoes, "Vazio");
 
-
-        // Painel de Ação (Sul)
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnSalvar = new JButton("Vincular e Salvar");
         JButton btnCancelar = new JButton("Cancelar");
@@ -74,7 +70,6 @@ public class TelaVincularConta extends JDialog {
         painelBotoes.add(btnCancelar);
         add(painelBotoes, BorderLayout.SOUTH);
 
-        // Listener para alternar os painéis de campos
         cmbTipoConta.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -90,17 +85,15 @@ public class TelaVincularConta extends JDialog {
         });
     }
 
-    // Criação dos Formulários Específicos
-
     private void criarPainelContaCorrente() {
         JPanel painelCC = new JPanel(new GridLayout(2, 2, 5, 5));
         painelCC.setBorder(BorderFactory.createTitledBorder("Dados Conta Corrente"));
 
-        painelCC.add(new JLabel("Depósito Inicial (R$):")); // [cite: 21]
+        painelCC.add(new JLabel("Depósito Inicial (R$):"));
         txtDepIniCC = new JTextField();
         painelCC.add(txtDepIniCC);
 
-        painelCC.add(new JLabel("Limite (R$):")); // [cite: 22]
+        painelCC.add(new JLabel("Limite (R$):"));
         txtLimiteCC = new JTextField();
         painelCC.add(txtLimiteCC);
 
@@ -111,27 +104,24 @@ public class TelaVincularConta extends JDialog {
         JPanel painelCI = new JPanel(new GridLayout(3, 2, 5, 5));
         painelCI.setBorder(BorderFactory.createTitledBorder("Dados Conta Investimento"));
 
-        painelCI.add(new JLabel("Montante Mínimo:")); // [cite: 26]
+        painelCI.add(new JLabel("Montante Mínimo:"));
         txtMontanteMinCI = new JTextField();
         painelCI.add(txtMontanteMinCI);
 
-        painelCI.add(new JLabel("Depósito Mínimo:")); // [cite: 27]
+        painelCI.add(new JLabel("Depósito Mínimo:"));
         txtDepMinCI = new JTextField();
         painelCI.add(txtDepMinCI);
 
-        painelCI.add(new JLabel("Depósito Inicial:")); // [cite: 28]
+        painelCI.add(new JLabel("Depósito Inicial:"));
         txtDepIniCI = new JTextField();
         painelCI.add(txtDepIniCI);
 
         painelCartoes.add(painelCI, "Investimento");
     }
 
-    // Lógica de Salvamento
-
     private void salvarConta() {
         String tipo = (String) cmbTipoConta.getSelectedItem();
 
-        // Gera o número da conta automaticamente
         int numConta = RepositorioDados.getInstance().gerarProximoNumeroConta();
 
         ContaCorrente novaCC = null;
@@ -139,33 +129,49 @@ public class TelaVincularConta extends JDialog {
 
         try {
             if ("Conta Corrente".equals(tipo)) {
+
                 double depInicial = Double.parseDouble(txtDepIniCC.getText());
                 double limite = Double.parseDouble(txtLimiteCC.getText());
 
-                if (depInicial < 0 || limite < 0) throw new NumberFormatException("Valores não podem ser negativos");
+                if (depInicial < 0 || limite < 0)
+                    throw new NumberFormatException("Valores não podem ser negativos.");
 
                 novaCC = new ContaCorrente(cliente, numConta, depInicial, limite);
 
             } else if ("Conta Investimento".equals(tipo)) {
+
                 double montanteMin = Double.parseDouble(txtMontanteMinCI.getText());
                 double depMin = Double.parseDouble(txtDepMinCI.getText());
                 double depInicial = Double.parseDouble(txtDepIniCI.getText());
 
-                if (montanteMin < 0 || depMin < 0 || depInicial < 0) throw new NumberFormatException("Valores não podem ser negativos");
+                if (montanteMin < 0 || depMin < 0 || depInicial < 0)
+                    throw new NumberFormatException("Valores não podem ser negativos.");
 
                 novaCI = new ContaInvestimento(cliente, numConta, depInicial, montanteMin, depMin);
 
             } else {
-                JOptionPane.showMessageDialog(this, "Selecione um tipo de conta válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Selecione um tipo de conta válido.",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Valores inválidos. Verifique se todos os campos numéricos foram preenchidos corretamente.", "Erro de Dados", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Valores inválidos. Verifique se todos os campos numéricos foram preenchidos corretamente.",
+                    "Erro de Dados",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Erro ao Criar Conta",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Salvar no Repositório e vincular ao cliente
         if (novaCC != null) {
             RepositorioDados.getInstance().adicionarContaCorrente(novaCC);
             cliente.setConta(novaCC);
@@ -174,7 +180,9 @@ public class TelaVincularConta extends JDialog {
             cliente.setConta(novaCI);
         }
 
-        JOptionPane.showMessageDialog(this, "Conta " + numConta + " vinculada ao cliente " + cliente.getNome() + " com sucesso!");
+        JOptionPane.showMessageDialog(this,
+                "Conta " + numConta + " vinculada ao cliente " + cliente.getNome() + " com sucesso!");
+
         dispose();
     }
 }

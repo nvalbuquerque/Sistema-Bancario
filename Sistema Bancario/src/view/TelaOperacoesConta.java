@@ -25,28 +25,25 @@ public class TelaOperacoesConta extends JDialog {
 
         // Painel Central
         JPanel painelCentro = new JPanel(new GridLayout(3, 1, 5, 5));
-        
-        // Label do Saldo Atual
+
         lblSaldoAtual = new JLabel();
         painelCentro.add(lblSaldoAtual);
 
-        // Campo de Valor
         painelCentro.add(new JLabel("Valor da Operação (R$):"));
         txtValor = new JTextField(10);
         painelCentro.add(txtValor);
-        
-        atualizarSaldoVisual();
 
+        atualizarSaldoVisual();
         add(painelCentro, BorderLayout.NORTH);
 
-        // Painel de Botões
+        // Painel Botões
         JPanel painelBotoes = new JPanel(new GridLayout(2, 2, 10, 10));
 
         JButton btnSaque = new JButton("Sacar");
         JButton btnDeposito = new JButton("Depositar");
         JButton btnVerSaldo = new JButton("Ver Saldo");
         JButton btnRemunera = new JButton("Remunerar");
-        
+
         btnSaque.addActionListener(e -> efetuarSaque());
         btnDeposito.addActionListener(e -> efetuarDeposito());
         btnVerSaldo.addActionListener(e -> mostrarSaldo());
@@ -58,7 +55,7 @@ public class TelaOperacoesConta extends JDialog {
         painelBotoes.add(btnRemunera);
 
         add(painelBotoes, BorderLayout.CENTER);
-        
+
         JButton btnFechar = new JButton("Fechar");
         btnFechar.addActionListener(e -> dispose());
         add(btnFechar, BorderLayout.SOUTH);
@@ -69,21 +66,21 @@ public class TelaOperacoesConta extends JDialog {
     }
 
     private void mostrarSaldo() {
-        JOptionPane.showMessageDialog(this, 
-            "Saldo atual na conta " + conta.getNumero() + ":\n" + df.format(conta.getSaldo()), 
-            "Ver Saldo", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this,
+                "Saldo atual na conta " + conta.getNumero() + ":\n" + df.format(conta.getSaldo()),
+                "Ver Saldo", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Lê apenas valores numéricos. Regras de valor > 0 ficam no modelo (Conta).
+     */
     private double getValorDigitado() {
         try {
-            double valor = Double.parseDouble(txtValor.getText());
-            if (valor <= 0) {
-                 JOptionPane.showMessageDialog(this, "O valor deve ser positivo.", "Erro", JOptionPane.ERROR_MESSAGE);
-                 return -1;
-            }
-            return valor;
+            return Double.parseDouble(txtValor.getText());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Insira um valor numérico válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Insira um valor numérico válido.",
+                    "Erro", JOptionPane.ERROR_MESSAGE);
             return -1;
         }
     }
@@ -92,42 +89,66 @@ public class TelaOperacoesConta extends JDialog {
         double valor = getValorDigitado();
         if (valor == -1) return;
 
-        boolean sucesso = conta.saca(valor);
+        try {
+            conta.saca(valor);
 
-        if (sucesso) {
-            JOptionPane.showMessageDialog(this, "Saque de " + df.format(valor) + " efetuado com sucesso!", "Saque", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Saque de " + df.format(valor) + " efetuado com sucesso!",
+                    "Saque", JOptionPane.INFORMATION_MESSAGE);
+
             atualizarSaldoVisual();
-        } else {
-            JOptionPane.showMessageDialog(this, "Saque não permitido. Verifique saldo ou limite/montante mínimo.", "Erro no Saque", JOptionPane.ERROR_MESSAGE);
+
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Erro no Saque",
+                    JOptionPane.ERROR_MESSAGE);
         }
+
         txtValor.setText("");
     }
-
 
     private void efetuarDeposito() {
         double valor = getValorDigitado();
         if (valor == -1) return;
 
-        boolean sucesso = conta.deposita(valor);
+        try {
+            conta.deposita(valor);
 
-        if (sucesso) {
-            JOptionPane.showMessageDialog(this, "Depósito de " + df.format(valor) + " efetuado com sucesso!", "Depósito", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Depósito de " + df.format(valor) + " efetuado com sucesso!",
+                    "Depósito", JOptionPane.INFORMATION_MESSAGE);
+
             atualizarSaldoVisual();
-        } else {
-            JOptionPane.showMessageDialog(this, "Depósito não permitido. Verifique se atende o depósito mínimo (se for Conta Investimento).", "Erro no Depósito", JOptionPane.ERROR_MESSAGE);
+
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Erro no Depósito",
+                    JOptionPane.ERROR_MESSAGE);
         }
+
         txtValor.setText("");
     }
 
     private void remunerarConta() {
-        conta.remunera();
-        
-        String tipoConta = (conta instanceof ContaCorrente) ? "Conta Corrente (1%)" : "Conta Investimento (2%)";
-        
-        JOptionPane.showMessageDialog(this, 
-            "Remuneração aplicada com sucesso para: " + tipoConta, 
-            "Remuneração", JOptionPane.INFORMATION_MESSAGE);
-        
-        atualizarSaldoVisual();
+        try {
+            conta.remunera();
+
+            String tipoConta = (conta instanceof ContaCorrente)
+                    ? "Conta Corrente (1%)"
+                    : "Conta Investimento (2%)";
+
+            JOptionPane.showMessageDialog(this,
+                    "Remuneração aplicada com sucesso para: " + tipoConta,
+                    "Remuneração", JOptionPane.INFORMATION_MESSAGE);
+
+            atualizarSaldoVisual();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao aplicar remuneração: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
