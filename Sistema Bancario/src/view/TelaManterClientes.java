@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Comparator;
 
 import model.*;
-import Utils.ButtonColumn;
+import Utils.ButtonColumn; // classe customizada para colocar botões dentro da JTable
 
-public class TelaManterClientes extends JFrame {
+public class TelaManterClientes extends JFrame { // JFrame principal
 
     private JTable tabelaClientes;
     private ClienteTableModel tableModel;
@@ -49,7 +49,7 @@ public class TelaManterClientes extends JFrame {
         tableModel = new ClienteTableModel();
         tabelaClientes = new JTable(tableModel);
 
-        TableRowSorter<ClienteTableModel> sorter = new TableRowSorter<>(tableModel);
+        TableRowSorter<ClienteTableModel> sorter = new TableRowSorter<>(tableModel); // permite ordenar e filtrar dados da tabela
         
         // CONFIG COMPARADORES COLUNAS
         configurarComparadores(sorter);
@@ -57,7 +57,7 @@ public class TelaManterClientes extends JFrame {
         tabelaClientes.setRowSorter(sorter);
         tabelaClientes.setAutoCreateRowSorter(false);
 
-        JScrollPane scrollPane = new JScrollPane(tabelaClientes);
+        JScrollPane scrollPane = new JScrollPane(tabelaClientes); // painel com barras de rolagem
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
         // BOTÕES INFERIORES
