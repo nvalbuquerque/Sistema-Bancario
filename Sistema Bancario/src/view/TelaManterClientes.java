@@ -84,8 +84,6 @@ public class TelaManterClientes extends JFrame { // JFrame principal
             tableModel.recarregar();
         });
 
-        // BOTAO COLUNAS
-
         // BOTÃO EDITAR
         ActionListener acaoEditar = new ActionListener() {
             @Override
@@ -94,7 +92,7 @@ public class TelaManterClientes extends JFrame { // JFrame principal
                 try {
                     int linhaView = Integer.parseInt(e.getActionCommand());
                     if (linhaView >= 0) {
-                        int linhaModelo = tabelaClientes.convertRowIndexToModel(linhaView);
+                        int linhaModelo = tabelaClientes.convertRowIndexToModel(linhaView); // converte índice da view para o modelo
                         System.out.println("Abrindo edição para linha modelo: " + linhaModelo);
                         abrirTelaCadastroAtualizacao(linhaModelo);
                     } else {
@@ -252,7 +250,7 @@ public class TelaManterClientes extends JFrame { // JFrame principal
     // MÉTODOS PARA ABRIR TELAS
 
     private void abrirTelaCadastroInclusao() {
-        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, null);
+        TelaCadastroCliente telaCadastro = new TelaCadastroCliente(this, null); // TelaManterClientes é a tela pai, passa cliente como null para inclusão
         telaCadastro.setLocationRelativeTo(this);
         telaCadastro.setVisible(true);
         atualizarTabela();
